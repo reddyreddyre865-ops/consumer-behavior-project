@@ -36,7 +36,7 @@ consumer-behavior-project/
 │   │   └── shopping_behavior_updated.csv
 │   └── processed/
 │       └── shopping.db
-│
+│.           shopping.sqbpro
 ├── notebooks/
 │   ├── 01_data_prep.ipynb
 │   └── untitled.ipynb
@@ -48,7 +48,7 @@ consumer-behavior-project/
 ├── powerbi/
 │   └── shopping_dashboard.html
 │
-├── shopping.sqbpro
+|
 └── README.md
 ```
 
