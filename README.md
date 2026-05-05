@@ -118,20 +118,7 @@ GROUP BY discount_applied, promo_code_used;
 ---
 
 ## 📊 Dashboard Preview
-
-### 🔹 Overall Dashboard
-
-![Dashboard Overview](images/dashboard_overview.png)
-
-### 🔹 Customer Segmentation
-
-![Customer Segmentation](images/customer_segmentation.png)
-
-### 🔹 Payment & Shipping Insights
-
-![Payment Insights](images/payment_shipping.png)
-
-> ⚠️ Replace above images with real screenshots from `powerbi/shopping_dashboard.html`
+https://github.com/reddyreddyre865-ops/consumer-behavior-project/blob/main/Screenshot%202026-05-05%20205957.png?raw=true
 
 ---
 
