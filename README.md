@@ -160,7 +160,7 @@ This project demonstrates how data can:
 
 ## 👨‍💻 Author
 
-**Your Name**
+PATURU REDDY HIMAKUMAR
 Aspiring Data Analyst
 📫 LinkedIn: (Add your link)
 
@@ -171,28 +171,6 @@ Aspiring Data Analyst
 > End-to-end data analytics project analyzing consumer behavior using Python, SQL, and Power BI. Includes data cleaning, database design, advanced SQL analysis, and interactive dashboards with actionable business insights.
 
 ---
-
-## 📄 Resume Bullet Points (Top 1%)
-
-* Built an end-to-end data analytics pipeline using **Python, SQL, and Power BI** to analyze customer purchasing behavior
-* Processed raw transactional data into a structured **SQLite database**
-* Performed advanced SQL analysis on **customer segmentation, payment behavior, and discount impact**
-* Developed an interactive **Power BI dashboard** to track KPIs and insights
-* Delivered actionable insights to support **data-driven business decisions**
-
----
-
-## 📸 Add Screenshots (Important)
-
-1. Open `shopping_dashboard.html`
-2. Take screenshots
-3. Create folder: `images/`
-4. Save as:
-
-   * dashboard_overview.png
-   * customer_segmentation.png
-   * payment_shipping.png
-5. Push to GitHub
 
 ---
 
