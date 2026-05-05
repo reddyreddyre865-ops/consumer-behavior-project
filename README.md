@@ -118,7 +118,7 @@ GROUP BY discount_applied, promo_code_used;
 ---
 
 ## 📊 Dashboard Preview
-https://github.com/reddyreddyre865-ops/consumer-behavior-project/blob/main/Screenshot%202026-05-05%20205957.png?raw=true
+Screenshot 2026-05-05 205957.png
 
 ---
 
