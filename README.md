@@ -1,145 +1,151 @@
-# 🛒 Consumer Behavior Analytics Project
+# 🛍️ Consumer Behavior Analysis | End-to-End Data Analytics Project
 
-> 📊 End-to-End Data Analytics Project | SQL + Python + Dashboard
-> 🎯 Goal: Understand customer purchase behavior & generate actionable business insights
+> A complete data analytics pipeline analyzing customer shopping behavior using SQL, Python, and Power BI to uncover actionable business insights.
 
 ---
 
 ## 📌 Project Overview
 
-This project analyzes **consumer shopping behavior** using structured data and delivers **business insights through an interactive dashboard**.
+This project explores **consumer purchasing behavior**, identifying patterns in:
 
-It covers the complete analytics lifecycle:
-✔ Data Cleaning
-✔ Data Analysis
-✔ SQL Querying
-✔ Business Insights
-✔ Interactive Dashboard
+* Customer spending
+* Loyalty segmentation
+* Payment preferences
+* Discount impact on purchases
 
-The final output enables businesses to understand:
-
-* Customer preferences
-* Revenue drivers
-* Seasonal trends
-* Purchase behavior patterns
+The goal is to simulate a **real-world data analyst workflow** — from raw data to business insights.
 
 ---
 
-## 🧠 Business Problem
+## 🧠 Key Insights
 
-Businesses often struggle to answer:
-
-* Which product category generates the most revenue?
-* What factors influence customer purchases?
-* How does seasonality affect buying behavior?
-* Which customers are most valuable?
-
-This project solves these using **data-driven insights**.
+* 💎 High-tier loyalty customers contribute the highest revenue
+* 💳 Certain payment + shipping combinations drive more transactions
+* 🎯 Discounts increase order volume but may reduce average spend
+* ⭐ Customer satisfaction varies across transaction types
 
 ---
 
-## 📂 Project Structure
+## 🗂️ Project Structure
 
 ```
 consumer-behavior-project/
 │
-├── 📊 data/
-│   └── shopping_behavior_updated.csv
+├── data/
+│   ├── raw/
+│   │   └── shopping_behavior_updated.csv
+│   └── processed/
+│       └── shopping.db
 │
-├── 🗄️ database/
-│   ├── shopping.db
-│   └── shopping.sqbpro
+├── notebooks/
+│   ├── 01_data_prep.ipynb
+│   └── untitled.ipynb
 │
-├── 📓 notebooks/
-│   └── 01_data_prep_ibynb
+├── sql/
+│   ├── create.sql
+│   └── analysis.sql
 │
-├── 📈 dashboard/
+├── powerbi/
 │   └── shopping_dashboard.html
 │
-├── 📷 assets/
-│   ├── dashboard-preview.png
-│   └── charts-preview.png
-│
+├── shopping.sqbpro
 └── README.md
 ```
 
 ---
 
-## 📊 Dataset Details
+## ⚙️ Tech Stack
 
-* 📁 File: `shopping_behavior_updated.csv`
-* 📌 Records: **3,900**
-* 📌 Features: **18 columns**
-
-**Key Columns:**
-Age • Gender • Category • Purchase Amount • Season • Rating • Subscription Status • Payment Method • Frequency of Purchase
-
----
-
-## 🧹 Data Cleaning & Preparation
-
-📓 Notebook: `01_data_prep_ibynb`
-
-Steps performed:
-
-* Handled missing values
-* Standardized categorical variables
-* Data type corrections
-* Feature engineering
-* Aggregations for dashboard
+* **Python** (Pandas, Data Cleaning)
+* **SQL (SQLite)** – Data analysis
+* **Power BI** – Dashboard visualization
+* **Jupyter Notebook** – Exploration
+* **DB Browser for SQLite (.sqbpro)**
 
 ---
 
-## 🗄️ SQL Analysis
+## 🔄 Workflow
 
-📁 `shopping.db` & `shopping.sqbpro`
+1. 📥 Raw data ingestion (`CSV`)
+2. 🧹 Data cleaning & preprocessing (`Python`)
+3. 🗄️ Database creation (`SQLite`)
+4. 📊 SQL analysis (aggregations & insights)
+5. 📈 Dashboard creation (`Power BI`)
+6. 📌 Business insights & storytelling
 
-Used SQL for querying and KPI calculations:
+---
+
+## 🧮 Key SQL Analysis
+
+### 1️⃣ Loyalty Tier Analysis
 
 ```sql
-SELECT category, SUM(purchase_amount)
+SELECT
+    loyalty_tier,
+    COUNT(*) AS customers,
+    ROUND(AVG(purchase_amount), 2) AS avg_spend,
+    ROUND(AVG(review_rating), 2) AS avg_rating,
+    SUM(subscription_status) AS subscribers
 FROM shopping
-GROUP BY category;
+GROUP BY loyalty_tier
+ORDER BY avg_spend DESC;
+```
+
+### 2️⃣ Payment & Shipping Behavior
+
+```sql
+SELECT
+    preferred_payment_method,
+    shipping_type,
+    COUNT(*) AS transactions,
+    ROUND(AVG(purchase_amount), 2) AS avg_amount
+FROM shopping
+GROUP BY preferred_payment_method, shipping_type;
+```
+
+### 3️⃣ Discount Impact
+
+```sql
+SELECT
+    discount_applied,
+    promo_code_used,
+    COUNT(*) AS orders,
+    ROUND(AVG(purchase_amount), 2) AS avg_purchase
+FROM shopping
+GROUP BY discount_applied, promo_code_used;
 ```
 
 ---
 
-## 📈 Interactive Dashboard
+## 📊 Dashboard Preview
 
-📁 `shopping_dashboard.html`
+### 🔹 Overall Dashboard
 
-**Features:**
-✔ KPI Cards
-✔ Revenue Analysis
-✔ Customer Segmentation
-✔ Filter Panel (Category, Gender, Season, Subscription)
-✔ Interactive Charts
+![Dashboard Overview](images/dashboard_overview.png)
 
----
+### 🔹 Customer Segmentation
 
-## 📷 Dashboard Preview
+![Customer Segmentation](images/customer_segmentation.png)
 
- [Shopping Behavior Dashboard](file:///C:/Users/hp/Desktop/consumer-behavior-project/powerbi/shopping_dashboard.html)  
+### 🔹 Payment & Shipping Insights
 
----
+![Payment Insights](images/payment_shipping.png)
 
-## 📊 Key Insights
-
-💰 **Revenue Drivers** → Clothing generates highest revenue
-👥 **Customer Behavior** → Frequent purchases (weekly/monthly)
-💳 **Payment Trends** → Digital payments dominate
-🌦️ **Seasonality** → Peak sales in Fall & Winter
-📈 **Subscriptions** → Subscribers purchase more frequently
+> ⚠️ Replace above images with real screenshots from `powerbi/shopping_dashboard.html`
 
 ---
 
-## 🛠️ Tech Stack
+## 📁 Dataset
 
-* Python (Pandas, NumPy)
-* SQL
-* HTML, CSS, JavaScript
-* Chart.js
-* Jupyter Notebook
+* Source: Simulated retail dataset
+* Records: Customer transactions
+* Features include:
+
+  * Purchase Amount
+  * Loyalty Tier
+  * Payment Method
+  * Discount Usage
+  * Ratings
 
 ---
 
@@ -148,46 +154,60 @@ GROUP BY category;
 ```bash
 git clone https://github.com/your-username/consumer-behavior-project.git
 cd consumer-behavior-project
-jupyter notebook
-```
-
-Open dashboard manually:
-
-```
-shopping_dashboard.html
+jupyter notebook notebooks/01_data_prep.ipynb
 ```
 
 ---
 
-## 📌 Project Highlights
+## 📌 Business Impact
 
-⭐ End-to-End Analytics Workflow
-⭐ Real-world Dataset Simulation
-⭐ Interactive Dashboard
-⭐ SQL + Python Integration
-⭐ Business-Oriented Insights
+This project demonstrates how data can:
 
----
-
-## 🎯 Future Improvements
-
-* Add Machine Learning (Customer Segmentation)
-* Deploy Dashboard (Streamlit / Power BI)
-* Real-time data integration
-* Predictive analytics
+* Increase revenue through customer segmentation
+* Optimize discount strategies
+* Improve customer satisfaction
+* Support data-driven decision making
 
 ---
 
 ## 👨‍💻 Author
 
-**Your Name** – Aspiring Data Analyst
+**Your Name**
+Aspiring Data Analyst
+📫 LinkedIn: (Add your link)
 
-📧 [reddyreddyre865@gmail.com](mailto:reddyreddyre865@gmail.com)
-🔗 https://linkedin.com/in/your-profile
-💻  G[reddyreddyre865-ops](https://github.com/reddyreddyre865-ops)  
+---
+
+## 💼 GitHub Portfolio Description
+
+> End-to-end data analytics project analyzing consumer behavior using Python, SQL, and Power BI. Includes data cleaning, database design, advanced SQL analysis, and interactive dashboards with actionable business insights.
+
+---
+
+## 📄 Resume Bullet Points (Top 1%)
+
+* Built an end-to-end data analytics pipeline using **Python, SQL, and Power BI** to analyze customer purchasing behavior
+* Processed raw transactional data into a structured **SQLite database**
+* Performed advanced SQL analysis on **customer segmentation, payment behavior, and discount impact**
+* Developed an interactive **Power BI dashboard** to track KPIs and insights
+* Delivered actionable insights to support **data-driven business decisions**
+
+---
+
+## 📸 Add Screenshots (Important)
+
+1. Open `shopping_dashboard.html`
+2. Take screenshots
+3. Create folder: `images/`
+4. Save as:
+
+   * dashboard_overview.png
+   * customer_segmentation.png
+   * payment_shipping.png
+5. Push to GitHub
 
 ---
 
 ## ⭐ Support
 
-If you found this project useful, consider giving it a ⭐ on GitHub!
+If you like this project, give it a ⭐ on GitHub!
