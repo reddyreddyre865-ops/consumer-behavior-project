@@ -140,7 +140,7 @@ GROUP BY discount_applied, promo_code_used;
 ## 🚀 How to Run
 
 ```bash
-git clone https://github.com/your-username/consumer-behavior-project.git
+git clone https://github.com/reddyreddyre865-ops/consumer-behavior-project.git
 cd consumer-behavior-project
 jupyter notebook notebooks/01_data_prep.ipynb
 ```
