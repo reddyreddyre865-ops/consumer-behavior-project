@@ -119,6 +119,7 @@ GROUP BY discount_applied, promo_code_used;
 
 ## 📊 Dashboard Preview
 Screenshot 2026-05-05 205957.png
+Screenshot 2026-05-05 210024.png
 
 ---
 
