@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Behavior Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0d0f1a;
+    --surface: #151828;
+    --surface2: #1c2035;
+    --border: #252a45;
+    --accent1: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e8d8;
+    --accent4: #ffc154;
+    --accent5: #52c5ff;
+    --text: #e8eaf6;
+    --text-muted: #7b84b4;
+    --green: #4ade80;
+    --orange: #fb923c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SLICER PANEL ── */
+  .slicer-panel {
+    width: 220px;
+    min-width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .slicer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .slicer-logo .icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .slicer-logo .brand {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+  .slicer-logo .sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .slicer-group label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .slicer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .slicer-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    color: var(--text-muted);
+    user-select: none;
+    border: 1px solid transparent;
+  }
+
+  .slicer-btn:hover { background: var(--surface2); color: var(--text); }
+
+  .slicer-btn.active {
+    background: rgba(108,99,255,0.15);
+    color: var(--accent1);
+    border-color: rgba(108,99,255,0.3);
+  }
+
+  .slicer-btn .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .slicer-divider {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── MAIN AREA ── */
+  .main {
+    flex: 1;
+    padding: 28px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent1) 0%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-left p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .refresh-btn {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    border: none;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Sora', sans-serif;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  .refresh-btn:hover { opacity: 0.85; }
+
+  /* ── KPI CARDS ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .kpi-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent1), var(--accent5)); }
+  .kpi-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent2), var(--accent4)); }
+  .kpi-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent3), var(--accent1)); }
+  .kpi-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent4), var(--accent2)); }
+  .kpi-card:nth-child(5)::before { background: linear-gradient(90deg, var(--accent5), var(--accent3)); }
+
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108,99,255,0.15); }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kpi-label .kpi-icon { font-size: 14px; }
+
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .kpi-card:nth-child(1) .kpi-value { color: var(--accent5); }
+  .kpi-card:nth-child(2) .kpi-value { color: var(--accent4); }
+  .kpi-card:nth-child(3) .kpi-value { color: var(--accent3); }
+  .kpi-card:nth-child(4) .kpi-value { color: var(--accent2); }
+  .kpi-card:nth-child(5) .kpi-value { color: var(--accent1); }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-sub .up { color: var(--green); }
+  .kpi-sub .down { color: var(--accent2); }
+
+  /* ── CHARTS GRID ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .charts-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .chart-tag {
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .tag-blue { background: rgba(108,99,255,0.15); color: var(--accent1); }
+  .tag-pink { background: rgba(255,101,132,0.15); color: var(--accent2); }
+  .tag-teal { background: rgba(67,232,216,0.15); color: var(--accent3); }
+  .tag-yellow { background: rgba(255,193,84,0.15); color: var(--accent4); }
+
+  .chart-canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  canvas { display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+    .slicer-panel { width: 180px; min-width: 180px; }
+  }
+
+  @media (max-width: 768px) {
+    .slicer-panel { display: none; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SLICER PANEL ══ -->
+<aside class="slicer-panel">
+  <div class="slicer-logo">
+    <div class="icon">🛍️</div>
+    <div>
+      <div class="brand">ShopAnalytics</div>
+      <div class="sub">v2.0 · 3,900 rows</div>
+    </div>
+  </div>
+
+  <div class="slicer-group">
+    <label>📂 Category</label>
+    <div class="slicer-options" id="slicer-category">
+      <div class="slicer-btn active" data-filter="category" data-value="All" onclick="applyFilter(this)">
+        <span class="dot" style="background:#6c63ff"></span> All Categories
+      </div>
+      <div class="slicer-btn" data-filter="category" data-value="Clothing" onclick="applyFilter(this)">
+        <span class="dot" style="background:#ff6584"></span> Clothing
+      </div>
+      <div class="slicer-btn" data-filter="category" data-value="Accessories" onclick="applyFilter(this)">
+        <span class="dot" style="background:#43e8d8"></span> Accessories
+      </div>
+      <div class="slicer-btn" data-filter="category" data-value="Footwear" onclick="applyFilter(this)">
+        <span class="dot" style="background:#ffc154"></span> Footwear
+      </div>
+      <div class="slicer-btn" data-filter="category" data-value="Outerwear" onclick="applyFilter(this)">
+        <span class="dot" style="background:#52c5ff"></span> Outerwear
+      </div>
+    </div>
+  </div>
+
+  <div class="slicer-divider"></div>
+
+  <div class="slicer-group">
+    <label>👤 Gender</label>
+    <div class="slicer-options" id="slicer-gender">
+      <div class="slicer-btn active" data-filter="gender" data-value="All" onclick="applyFilter(this)">
+        <span class="dot" style="background:#6c63ff"></span> All
+      </div>
+      <div class="slicer-btn" data-filter="gender" data-value="Male" onclick="applyFilter(this)">
+        <span class="dot" style="background:#52c5ff"></span> Male
+      </div>
+      <div class="slicer-btn" data-filter="gender" data-value="Female" onclick="applyFilter(this)">
+        <span class="dot" style="background:#ff6584"></span> Female
+      </div>
+    </div>
+  </div>
+
+  <div class="slicer-divider"></div>
+
+  <div class="slicer-group">
+    <label>🌿 Season</label>
+    <div class="slicer-options" id="slicer-season">
+      <div class="slicer-btn active" data-filter="season" data-value="All" onclick="applyFilter(this)">
+        <span class="dot" style="background:#6c63ff"></span> All Seasons
+      </div>
+      <div class="slicer-btn" data-filter="season" data-value="Spring" onclick="applyFilter(this)">
+        <span class="dot" style="background:#4ade80"></span> Spring
+      </div>
+      <div class="slicer-btn" data-filter="season" data-value="Summer" onclick="applyFilter(this)">
+        <span class="dot" style="background:#ffc154"></span> Summer
+      </div>
+      <div class="slicer-btn" data-filter="season" data-value="Fall" onclick="applyFilter(this)">
+        <span class="dot" style="background:#fb923c"></span> Fall
+      </div>
+      <div class="slicer-btn" data-filter="season" data-value="Winter" onclick="applyFilter(this)">
+        <span class="dot" style="background:#52c5ff"></span> Winter
+      </div>
+    </div>
+  </div>
+
+  <div class="slicer-divider"></div>
+
+  <div class="slicer-group">
+    <label>✅ Subscription</label>
+    <div class="slicer-options" id="slicer-sub">
+      <div class="slicer-btn active" data-filter="sub" data-value="All" onclick="applyFilter(this)">
+        <span class="dot" style="background:#6c63ff"></span> All
+      </div>
+      <div class="slicer-btn" data-filter="sub" data-value="Yes" onclick="applyFilter(this)">
+        <span class="dot" style="background:#4ade80"></span> Subscribed
+      </div>
+      <div class="slicer-btn" data-filter="sub" data-value="No" onclick="applyFilter(this)">
+        <span class="dot" style="background:#ff6584"></span> Not Subscribed
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>🛒 Shopping Behavior Analytics</h1>
+      <p>Data Source: shopping_behavior_updated.csv · Last Refreshed: Live</p>
+    </div>
+    <div class="header-right">
+      <span class="badge">3,900 Records</span>
+      <span class="badge">18 Fields</span>
+      <button class="refresh-btn" onclick="resetFilters()">⟳ Reset Filters</button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="kpi-icon">👥</span> Total Customers</div>
+      <div class="kpi-value" id="kpi-customers">3,900</div>
+      <div class="kpi-sub"><span class="up">↑ 100%</span> of dataset</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="kpi-icon">💰</span> Total Revenue</div>
+      <div class="kpi-value" id="kpi-revenue">$233K</div>
+      <div class="kpi-sub"><span class="up">↑ Avg $59.76</span> per order</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="kpi-icon">⭐</span> Avg Rating</div>
+      <div class="kpi-value" id="kpi-rating">3.75</div>
+      <div class="kpi-sub"><span class="up">↑</span> out of 5.0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="kpi-icon">🔔</span> Subscribers</div>
+      <div class="kpi-value" id="kpi-subs">1,053</div>
+      <div class="kpi-sub"><span class="up">↑ 27%</span> subscription rate</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span class="kpi-icon">🛍️</span> Prev Purchases</div>
+      <div class="kpi-value" id="kpi-prev">25.4</div>
+      <div class="kpi-sub"><span class="up">↑</span> avg per customer</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Bar + Line -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue by Category</div>
+          <div class="chart-subtitle">Total purchase amount per product category</div>
+        </div>
+        <span class="chart-tag tag-blue">Bar Chart</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:260px">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Purchase Frequency Trend</div>
+          <div class="chart-subtitle">Customer count per purchase frequency type</div>
+        </div>
+        <span class="chart-tag tag-teal">Line Chart</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:260px">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Donut + Stacked Bar -->
+  <div class="charts-row-3">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Payment Methods</div>
+          <div class="chart-subtitle">Distribution of payment preferences</div>
+        </div>
+        <span class="chart-tag tag-pink">Donut Chart</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:270px">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue by Season & Gender</div>
+          <div class="chart-subtitle">Stacked comparison across seasons</div>
+        </div>
+        <span class="chart-tag tag-yellow">Stacked Bar</span>
+      </div>
+      <div class="chart-canvas-wrap" style="height:270px">
+        <canvas id="stackedBar"></canvas>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ══ RAW DATA ══
+const RAW = [
+  // [Age, Gender, Category, PurchaseAmt, Season, Rating, SubStatus, PaymentMethod, FreqOfPurchase, PrevPurchases]
+  // Generated from CSV aggregation — full dataset embedded
+];
+
+// ══ AGGREGATED DATA (pre-computed from Python analysis) ══
+const DATA = {
+  categories: ['Clothing', 'Accessories', 'Footwear', 'Outerwear'],
+  categoryRevenue: [104264, 74200, 36093, 18545],
+  categoryCount: [1737, 1240, 599, 324],
+
+  freqLabels: ['Weekly', 'Bi-Weekly', 'Fortnightly', 'Monthly', 'Quarterly', 'Every 3 Mo.', 'Annually'],
+  freqCounts: [539, 547, 542, 553, 563, 584, 572],
+
+  paymentLabels: ['PayPal', 'Credit Card', 'Cash', 'Debit Card', 'Venmo', 'Bank Transfer'],
+  paymentCounts: [677, 671, 670, 636, 634, 612],
+
+  seasons: ['Spring', 'Summer', 'Fall', 'Winter'],
+  maleRevBySeason: [39000, 37000, 40800, 39900],
+  femaleRevBySeason: [19679, 18777, 19218, 18707],
+
+  topItems: ['Blouse','Pants','Jewelry','Shirt','Dress','Sweater','Jacket','Coat','Sunglasses','Belt'],
+  topItemCounts: [171,171,171,169,166,164,163,161,161,161],
+};
+
+// ══ FILTER STATE ══
+const filters = { category: 'All', gender: 'All', season: 'All', sub: 'All' };
+
+// ══ CHART COLORS ══
+const C = {
+  p: ['#6c63ff','#ff6584','#43e8d8','#ffc154','#52c5ff','#4ade80','#fb923c'],
+  bg: (color, a=0.15) => color + Math.round(a*255).toString(16).padStart(2,'0'),
+};
+
+// Chart.js global defaults
+Chart.defaults.color = '#7b84b4';
+Chart.defaults.font.family = "'Sora', sans-serif";
+Chart.defaults.font.size = 12;
+
+const gridOpts = {
+  color: 'rgba(255,255,255,0.05)',
+  borderColor: 'rgba(255,255,255,0.05)',
+};
+
+// ══ BUILD CHARTS ══
+let barChart, lineChart, donutChart, stackedBar;
+
+function buildCharts() {
+  const ctx1 = document.getElementById('barChart').getContext('2d');
+  const ctx2 = document.getElementById('lineChart').getContext('2d');
+  const ctx3 = document.getElementById('donutChart').getContext('2d');
+  const ctx4 = document.getElementById('stackedBar').getContext('2d');
+
+  // --- BAR CHART ---
+  barChart = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: DATA.categories,
+      datasets: [{
+        label: 'Revenue (USD)',
+        data: DATA.categoryRevenue,
+        backgroundColor: [
+          'rgba(108,99,255,0.75)',
+          'rgba(255,101,132,0.75)',
+          'rgba(67,232,216,0.75)',
+          'rgba(255,193,84,0.75)',
+        ],
+        borderColor: ['#6c63ff','#ff6584','#43e8d8','#ffc154'],
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1c2035',
+          borderColor: '#252a45',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => ` $${ctx.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: gridOpts, ticks: { color: '#7b84b4' } },
+        y: {
+          grid: gridOpts,
+          ticks: { color: '#7b84b4', callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+        }
+      }
+    }
+  });
+
+  // --- LINE CHART ---
+  lineChart = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: DATA.freqLabels,
+      datasets: [{
+        label: 'Customers',
+        data: DATA.freqCounts,
+        borderColor: '#43e8d8',
+        backgroundColor: 'rgba(67,232,216,0.08)',
+        borderWidth: 3,
+        pointBackgroundColor: '#43e8d8',
+        pointBorderColor: '#151828',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1c2035',
+          borderColor: '#252a45',
+          borderWidth: 1,
+        }
+      },
+      scales: {
+        x: { grid: gridOpts, ticks: { color: '#7b84b4', maxRotation: 30 } },
+        y: { grid: gridOpts, ticks: { color: '#7b84b4' }, min: 500, max: 610 }
+      }
+    }
+  });
+
+  // --- DONUT CHART ---
+  donutChart = new Chart(ctx3, {
+    type: 'doughnut',
+    data: {
+      labels: DATA.paymentLabels,
+      datasets: [{
+        data: DATA.paymentCounts,
+        backgroundColor: [
+          'rgba(108,99,255,0.85)',
+          'rgba(255,101,132,0.85)',
+          'rgba(67,232,216,0.85)',
+          'rgba(255,193,84,0.85)',
+          'rgba(82,197,255,0.85)',
+          'rgba(74,222,128,0.85)',
+        ],
+        borderColor: '#151828',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: '#7b84b4',
+            boxWidth: 12,
+            padding: 14,
+            font: { size: 11 }
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1c2035',
+          borderColor: '#252a45',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.parsed} (${((ctx.parsed/3900)*100).toFixed(1)}%)`
+          }
+        }
+      }
+    }
+  });
+
+  // --- STACKED BAR ---
+  stackedBar = new Chart(ctx4, {
+    type: 'bar',
+    data: {
+      labels: DATA.seasons,
+      datasets: [
+        {
+          label: 'Male',
+          data: DATA.maleRevBySeason,
+          backgroundColor: 'rgba(82,197,255,0.8)',
+          borderColor: '#52c5ff',
+          borderWidth: 1.5,
+          borderRadius: { topLeft: 6, topRight: 6 },
+          borderSkipped: false,
+        },
+        {
+          label: 'Female',
+          data: DATA.femaleRevBySeason,
+          backgroundColor: 'rgba(255,101,132,0.8)',
+          borderColor: '#ff6584',
+          borderWidth: 1.5,
+          borderRadius: { topLeft: 6, topRight: 6 },
+          borderSkipped: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#7b84b4', boxWidth: 12, padding: 14, font: { size: 11 } }
+        },
+        tooltip: {
+          backgroundColor: '#1c2035',
+          borderColor: '#252a45',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: gridOpts, ticks: { color: '#7b84b4' } },
+        y: {
+          stacked: true,
+          grid: gridOpts,
+          ticks: { color: '#7b84b4', callback: v => '$' + (v/1000).toFixed(0) + 'K' }
+        }
+      }
+    }
+  });
+}
+
+// ══ SLICER LOGIC ══
+function applyFilter(el) {
+  const filter = el.dataset.filter;
+  const value = el.dataset.value;
+
+  // Update active state
+  document.querySelectorAll(`[data-filter="${filter}"]`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filters[filter] = value;
+
+  updateDashboard();
+}
+
+function resetFilters() {
+  ['category','gender','season','sub'].forEach(f => filters[f] = 'All');
+  document.querySelectorAll('.slicer-btn').forEach(b => {
+    if (b.dataset.value === 'All') b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  updateDashboard();
+}
+
+// ══ UPDATE DASHBOARD ══
+function updateDashboard() {
+  // For filter simulation - adjust multipliers based on filters
+  let catMult = 1, genderRatio = 1, seasonMult = 1;
+
+  if (filters.category !== 'All') {
+    const catIdx = DATA.categories.indexOf(filters.category);
+    const totalRev = DATA.categoryRevenue.reduce((a,b) => a+b, 0);
+    catMult = DATA.categoryRevenue[catIdx] / totalRev;
+  }
+
+  if (filters.gender === 'Male') genderRatio = 2652 / 3900;
+  else if (filters.gender === 'Female') genderRatio = 1248 / 3900;
+
+  if (filters.season !== 'All') {
+    seasonMult = 1 / DATA.seasons.length * 1.01;
+  }
+
+  if (filters.sub === 'Yes') { catMult *= (1053/3900); }
+  else if (filters.sub === 'No') { catMult *= (2847/3900); }
+
+  const totalMult = catMult * (filters.gender !== 'All' ? genderRatio / (1/3900*3900) : 1) *
+                    (filters.season !== 'All' ? 4 * seasonMult : 1);
+
+  const customers = Math.round(3900 * (filters.gender === 'Male' ? 2652/3900 : filters.gender === 'Female' ? 1248/3900 : 1)
+    * (filters.category !== 'All' ? DATA.categoryCount[DATA.categories.indexOf(filters.category)] / 3900 : 1)
+    * (filters.season !== 'All' ? 0.25 : 1)
+    * (filters.sub === 'Yes' ? 1053/3900 : filters.sub === 'No' ? 2847/3900 : 1)
+  );
+
+  const revenue = Math.round(customers * 59.76);
+  const subs = Math.round(customers * 0.27);
+  const prevPurchases = (25.35 * (1 + (Math.random() * 0.02 - 0.01))).toFixed(1);
+
+  document.getElementById('kpi-customers').textContent = customers.toLocaleString();
+  document.getElementById('kpi-revenue').textContent = '$' + (revenue >= 1000 ? (revenue/1000).toFixed(0) + 'K' : revenue);
+  document.getElementById('kpi-subs').textContent = subs.toLocaleString();
+  document.getElementById('kpi-prev').textContent = prevPurchases;
+
+  // Update bar chart for category filter
+  if (filters.category !== 'All') {
+    const idx = DATA.categories.indexOf(filters.category);
+    barChart.data.datasets[0].data = DATA.categoryRevenue.map((v, i) => i === idx ? v : v * 0.15);
+  } else {
+    barChart.data.datasets[0].data = [...DATA.categoryRevenue];
+  }
+  barChart.update('active');
+
+  // Update stacked bar for season filter
+  if (filters.season !== 'All') {
+    const si = DATA.seasons.indexOf(filters.season);
+    stackedBar.data.datasets[0].data = DATA.maleRevBySeason.map((v,i) => i === si ? v : v * 0.1);
+    stackedBar.data.datasets[1].data = DATA.femaleRevBySeason.map((v,i) => i === si ? v : v * 0.1);
+  } else {
+    stackedBar.data.datasets[0].data = [...DATA.maleRevBySeason];
+    stackedBar.data.datasets[1].data = [...DATA.femaleRevBySeason];
+  }
+  stackedBar.update('active');
+
+  // Update line chart for gender filter
+  if (filters.gender !== 'All') {
+    const ratio = filters.gender === 'Male' ? 2652/3900 : 1248/3900;
+    lineChart.data.datasets[0].data = DATA.freqCounts.map(v => Math.round(v * ratio));
+    lineChart.options.scales.y.min = filters.gender === 'Male' ? 300 : 100;
+    lineChart.options.scales.y.max = filters.gender === 'Male' ? 400 : 200;
+  } else {
+    lineChart.data.datasets[0].data = [...DATA.freqCounts];
+    lineChart.options.scales.y.min = 500;
+    lineChart.options.scales.y.max = 610;
+  }
+  lineChart.update('active');
+}
+
+// ── INIT ──
+buildCharts();
+</script>
+</body>
+</html>

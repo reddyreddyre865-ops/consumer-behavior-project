@@ -1,0 +1,115 @@
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv('../data/raw/shopping_behavior_updated.csv')
+
+print(df.shape)
+print(df.head())
+print(df.isnull().sum())
+
+df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+
+df = df.drop_duplicates()
+
+df['review_rating'] = df['review_rating'].fillna(df['review_rating'].median())
+df = df.dropna(subset=['age', 'purchase_amount_(usd)'])
+
+df = df.rename(columns={'purchase_amount_(usd)': 'purchase_amount'})
+
+for col in ['discount_applied', 'promo_code_used', 'subscription_status']:
+    df[col] = df[col].map({'Yes': 1, 'No': 0})
+
+df['age'] = df['age'].astype(int)
+df['purchase_amount'] = df['purchase_amount'].astype(float)
+
+df['age_group'] = pd.cut(df['age'],
+    bins=[0,25,35,50,100],
+    labels=['18-25','26-35','36-50','50+'])
+
+df['loyalty_tier'] = pd.cut(df['previous_purchases'],
+    bins=[0,10,25,100],
+    labels=['Bronze','Silver','Gold'])
+
+df['is_high_value'] = (df['purchase_amount'] >= df['purchase_amount'].quantile(0.75)).astype(int)
+
+df.to_csv('../data/processed/shopping_cleaned.csv', index=False)
+
+from sqlalchemy import create_engine
+
+engine = create_engine(
+    r'sqlite:///C:\Users\hp\Desktop\consumer-behavior-project\data\processed\shopping.db'
+)
+
+df.to_sql('shopping', engine, if_exists='replace', index=False)
+
+print("Database created successfully!")
+
+import pandas as pd
+import numpy as np
+from scipy import stats
+
+# Full descriptive stats
+desc = df['purchase_amount'].describe()
+print(desc)
+
+# Skewness and kurtosis
+skew = df['purchase_amount'].skew()
+kurt = df['purchase_amount'].kurtosis()
+print(f"Skewness: {skew:.3f}")
+print(f"Kurtosis: {kurt:.3f}")
+
+# Interpretation:
+# Skewness > 0 = right-skewed (most spend is low, few spend very high)
+# Skewness near 0 = symmetric distribution
+
+# Split into two groups
+group_discount = df[df['discount_applied']==1]['purchase_amount']
+group_no_discount = df[df['discount_applied']==0]['purchase_amount']
+
+# Independent samples t-test
+t_stat, p_value = stats.ttest_ind(group_discount, group_no_discount)
+
+print(f"Discount group mean: ${group_discount.mean():.2f}")
+print(f"No discount mean: ${group_no_discount.mean():.2f}")
+print(f"T-statistic: {t_stat:.4f}")
+print(f"P-value: {p_value:.4f}")
+
+if p_value < 0.05:
+    print("✓ Statistically significant difference (p < 0.05)")
+else:
+    print("✗ No significant difference")
+    
+    # Get purchase amounts per season
+spring = df[df['season']=='Spring']['purchase_amount']
+summer = df[df['season']=='Summer']['purchase_amount']
+fall   = df[df['season']=='Fall']['purchase_amount']
+winter = df[df['season']=='Winter']['purchase_amount']
+
+f_stat, p_value = stats.f_oneway(spring, summer, fall, winter)
+print(f"F-statistic: {f_stat:.4f}")
+print(f"P-value: {p_value:.4f}")
+
+# Means per season
+print(df.groupby('season')['purchase_amount'].mean().round(2))
+
+# Pearson correlation
+corr, p_val = stats.pearsonr(
+    df['review_rating'].dropna(),
+    df['purchase_amount'].dropna()
+)
+print(f"Pearson r = {corr:.4f}, p = {p_val:.4f}")
+
+# Interpretation:
+# r close to 1 = strong positive correlation
+# r close to 0 = no correlation
+# p < 0.05 = statistically significant
+
+# Create a cross-tab (contingency table)
+ct = pd.crosstab(df['gender'], df['preferred_payment_method'])
+print(ct)
+
+# Chi-square test
+chi2, p_val, dof, expected = stats.chi2_contingency(ct)
+print(f"Chi2 = {chi2:.4f}, p = {p_val:.4f}, df = {dof}")
+
+# If p < 0.05: payment preference depends on gender
