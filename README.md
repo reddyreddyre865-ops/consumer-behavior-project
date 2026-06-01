@@ -163,7 +163,7 @@ This project demonstrates how data can:
 
 PATURU REDDY HIMAKUMAR
 Aspiring Data Analyst
-📫 LinkedIn: (Add your link)
+
 
 ---
 
